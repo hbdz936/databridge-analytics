@@ -1,0 +1,37 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a08;
+  --bg-panel: #111110;
+  --bg-card: #161614;
+  --border: #2a2a26;
+  --border-bright: #3a3a34;
+  --amber: #d4860a;
+  --amber-bright: #f0a020;
+  --amber-dim: #7a4d06;
+  --amber-glow: rgba(212, 134, 10, 0.08);
+  --text-primary: #e8e4d8;
+  --text-secondary: #8a8678;
+  --text-dim: #4a4840;
+  --green: #4a8c3f;
+  --green-bright: #6ab85f;
+  --red: #8c3f3f;
+  --red-bright: #c05050;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+::selection { background: var(--amber-dim); color: var(--amber-bright); }

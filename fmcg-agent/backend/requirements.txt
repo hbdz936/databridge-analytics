@@ -1,0 +1,9 @@
+langchain
+langchain-openai
+langgraph
+langsmith
+databricks-sql-connector
+fastapi
+uvicorn
+python-dotenv
+pydantic

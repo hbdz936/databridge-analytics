@@ -1,23 +1,25 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from backend.graph.pipeline import pipeline
 from backend.graph.state import AgentState
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# LangSmith tracing — auto-enabled via .env vars
 os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2", "true")
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY", "")
-os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "fmcg-agent")
+os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "databridge-agent")
 
-app = FastAPI(title="FMCG Multi-Agent Analytics API")
+app = FastAPI(title="DataBridge Analytics API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite default port
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,7 +40,7 @@ class QueryResponse(BaseModel):
 
 @app.get("/")
 def health():
-    return {"status": "ok", "service": "fmcg-agent"}
+    return {"status": "ok", "service": "databridge-analytics"}
 
 @app.post("/query", response_model=QueryResponse)
 async def run_query(request: QueryRequest):
@@ -81,6 +83,6 @@ def sample_questions():
             "Which market has the highest sold quantity?",
             "Show me monthly sales trend for the Nutrition division",
             "Which customers are in the Brick & Mortar channel?",
-            "Compare revenue between sports and nutrition categories"
+            "Compare revenue between Sports and Nutrition categories"
         ]
     }

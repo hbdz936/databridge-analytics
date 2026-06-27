@@ -11,3 +11,4 @@ class AgentState(TypedDict):
     critic_feedback: str
     final_response: str
     error: Optional[str]
+    short_circuited: bool

@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from backend.graph.state import AgentState
 
-llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0, timeout=30)
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", """You are a critical reviewer for an AI analytics system.
@@ -29,16 +29,28 @@ Review this output.""")
 ])
 
 def critic_agent(state: AgentState) -> AgentState:
-    chain = prompt | llm
-    result = chain.invoke({
-        "user_query": state["user_query"],
-        "refined_query": state["refined_query"],
-        "generated_sql": state["generated_sql"],
-        "validation_result": state["validation_result"],
-        "insights": state["insights"]
-    })
+    if state.get("short_circuited"):
+        return {
+            **state,
+            "critic_feedback": "N/A — input was outside the analytical scope of this dataset, so no SQL was generated or evaluated.",
+            "final_response": state["insights"]
+        }
+
+    try:
+        chain = prompt | llm
+        result = chain.invoke({
+            "user_query": state["user_query"],
+            "refined_query": state["refined_query"],
+            "generated_sql": state["generated_sql"],
+            "validation_result": state["validation_result"],
+            "insights": state["insights"]
+        })
+        feedback = result.content
+    except Exception as e:
+        feedback = f"Critic evaluation failed: {str(e)}"
+
     return {
         **state,
-        "critic_feedback": result.content,
+        "critic_feedback": feedback,
         "final_response": state["insights"]
     }

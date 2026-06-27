@@ -5,9 +5,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from backend.graph.pipeline import pipeline
+from backend.graph.pipeline import pipeline, run_pipeline_with_timeout
 from backend.graph.state import AgentState
 from dotenv import load_dotenv
+import asyncio
 
 load_dotenv()
 
@@ -36,6 +37,7 @@ class QueryResponse(BaseModel):
     insights: str
     critic_feedback: str
     row_count: int
+    query_results: list[dict] = []
     error: str | None
 
 @app.get("/")
@@ -57,11 +59,13 @@ async def run_query(request: QueryRequest):
         "insights": "",
         "critic_feedback": "",
         "final_response": "",
-        "error": None
+        "error": None,
+        "short_circuited": False
     }
 
     try:
-        result = pipeline.invoke(initial_state)
+        result = await run_pipeline_with_timeout(initial_state, timeout_seconds=60)
+
         return QueryResponse(
             user_query=result["user_query"],
             refined_query=result["refined_query"],
@@ -69,11 +73,12 @@ async def run_query(request: QueryRequest):
             validation_result=result["validation_result"],
             insights=result["insights"],
             critic_feedback=result["critic_feedback"],
-            row_count=len(result["query_results"]),
+            row_count=len(result.get("query_results", [])),
+            query_results=result.get("query_results", [])[:50],
             error=result.get("error")
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
 
 @app.get("/sample-questions")
 def sample_questions():

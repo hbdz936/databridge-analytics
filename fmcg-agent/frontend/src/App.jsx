@@ -4,6 +4,7 @@ import AgentTrace from './components/AgentTrace'
 import InsightCard from './components/InsightCard'
 import SqlViewer from './components/SqlViewer'
 import CriticCard from './components/CriticCard'
+import ResultTable from './components/ResultTable'
 
 const SAMPLE_QUESTIONS = [
   'What are the top 5 products by revenue?',
@@ -43,7 +44,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('https://databridge-backend-nx1g.onrender.com/query', {
+      const res = await fetch('http://localhost:8000/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question })
@@ -179,8 +180,13 @@ export default function App() {
               </div>
 
               <InsightCard insights={result.insights} query={result.user_query} />
+
+              {result.query_results && result.query_results.length > 0 && (
+                <ResultTable results={result.query_results} />
+              )}
             </>
           )}
+
         </main>
       </div>
     </div>
